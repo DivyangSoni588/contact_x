@@ -8,4 +8,6 @@ abstract class ContactRepository {
   Future<void> deleteContact({required int id});
 
   Future<List<ContactModel>> searchContact({required String searchQuery});
+
+  Future<List<ContactModel>> filterContacts({required int categoryId});
 }

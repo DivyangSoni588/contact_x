@@ -6,4 +6,6 @@ abstract class ContactDataSource {
   Future<List<ContactModel>> getAllContacts();
   Future<void> deleteContact({required int id});
   Future<List<ContactModel>> searchContact({required String searchQuery});
+
+  Future<List<ContactModel>> filterContacts({required int categoryId});
 }

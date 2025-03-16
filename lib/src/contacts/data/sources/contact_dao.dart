@@ -56,4 +56,16 @@ class ContactDao {
 
     return maps.map((e) => ContactModel.fromMap(e)).toList();
   }
+
+  Future<List<ContactModel>> filterContacts(int categoryId) async {
+    final db = await DatabaseHelper.database;
+
+    List<Map<String, dynamic>> maps = await db.query(
+      DatabaseHelper.contactTable,
+      where: 'categoryId = ?',
+      whereArgs: [categoryId],
+    );
+
+    return maps.map((e) => ContactModel.fromMap(e)).toList();
+  }
 }

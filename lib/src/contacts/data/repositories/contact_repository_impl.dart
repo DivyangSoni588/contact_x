@@ -35,4 +35,9 @@ class ContactRepositoryImpl implements ContactRepository {
   Future<List<ContactModel>> searchContact({required String searchQuery}) {
     return _contactDataSource.searchContact(searchQuery: searchQuery);
   }
+
+  @override
+  Future<List<ContactModel>> filterContacts({required int categoryId}) {
+    return _contactDataSource.filterContacts(categoryId: categoryId);
+  }
 }

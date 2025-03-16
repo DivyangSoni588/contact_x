@@ -38,12 +38,12 @@ class SearchContactEvent extends ContactsEvent {
 }
 
 class FilterContactsByCategoryEvent extends ContactsEvent {
-  final String category;
+  final int categoryId;
 
-  const FilterContactsByCategoryEvent(this.category);
+  const FilterContactsByCategoryEvent(this.categoryId);
 
   @override
-  List<Object?> get props => [category];
+  List<Object?> get props => [categoryId];
 }
 
 class ClearFiltersEvent extends ContactsEvent {}

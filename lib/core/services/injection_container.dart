@@ -14,6 +14,7 @@ import 'package:contact_x/src/contacts/data/sources/local_contact_data_source.da
 import 'package:contact_x/src/contacts/domain/repositories/contact_repository.dart';
 import 'package:contact_x/src/contacts/domain/usecases/delete_contact_use_case.dart';
 import 'package:contact_x/src/contacts/domain/usecases/edit_contact_use_case.dart';
+import 'package:contact_x/src/contacts/domain/usecases/filter_contacts_use_case.dart';
 import 'package:contact_x/src/contacts/domain/usecases/get_all_contacts_use_case.dart';
 import 'package:contact_x/src/contacts/domain/usecases/insert_contact_use_case.dart';
 import 'package:contact_x/src/contacts/domain/usecases/search_contact_use_case.dart';
@@ -71,5 +72,8 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton(
     () => SearchContactUseCase(getIt<ContactRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => FilterContactsUseCase(getIt<ContactRepository>()),
   );
 }

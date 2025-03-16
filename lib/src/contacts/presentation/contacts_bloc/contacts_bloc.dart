@@ -1,5 +1,6 @@
 import 'package:contact_x/src/contacts/domain/usecases/delete_contact_use_case.dart';
 import 'package:contact_x/src/contacts/domain/usecases/edit_contact_use_case.dart';
+import 'package:contact_x/src/contacts/domain/usecases/filter_contacts_use_case.dart';
 import 'package:contact_x/src/contacts/domain/usecases/get_all_contacts_use_case.dart';
 import 'package:contact_x/src/contacts/domain/usecases/search_contact_use_case.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,13 +18,15 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       GetIt.instance.get<EditContactUseCase>();
   final SearchContactUseCase _searchContactUseCase =
       GetIt.instance.get<SearchContactUseCase>();
+  final FilterContactsUseCase _filterContactsUseCase =
+      GetIt.instance.get<FilterContactsUseCase>();
 
   ContactsBloc() : super(ContactsInitial()) {
     on<GetAllContactsEvent>(_onGetAllContacts);
     on<EditContactEvent>(_onEditContact);
     on<DeleteContactEvent>(_onDeleteContact);
     on<SearchContactEvent>(_onSearchContact);
-    // on<FilterContactsByCategoryEvent>(_onFilterContactsByCategory);
+    on<FilterContactsByCategoryEvent>(_onFilterContactsByCategory);
     // on<ClearFiltersEvent>(_onClearFilters);
   }
 
@@ -98,32 +101,32 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     }
   }
 
-  //
-  // void _onFilterContactsByCategory(FilterContactsByCategoryEvent event, Emitter<ContactsState> emit) {
-  //   if (state is ContactsLoaded) {
-  //     final currentState = state as ContactsLoaded;
-  //
-  //     List<Contact> filteredContacts = _applyFilters(
-  //       currentState.contacts,
-  //       currentState.searchQuery,
-  //       event.category,
-  //     );
-  //
-  //     emit(currentState.copyWith(filteredContacts: filteredContacts, activeCategory: event.category));
-  //   }
-  // }
-  //
+  void _onFilterContactsByCategory(
+    FilterContactsByCategoryEvent event,
+    Emitter<ContactsState> emit,
+  ) async {
+    if (state is ContactsLoaded) {
+      emit(ContactsLoading());
+      try {
+        final contacts = await _filterContactsUseCase.execute(event.categoryId);
+
+        emit(ContactsLoaded(contacts: contacts));
+      } catch (e) {
+        emit(ContactsError('Failed to edit contact: ${e.toString()}'));
+      }
+    }
+  }
+
   // void _onClearFilters(ClearFiltersEvent event, Emitter<ContactsState> emit) {
   //   if (state is ContactsLoaded) {
-  //     final currentState = state as ContactsLoaded;
-  //     emit(
-  //       currentState.copyWith(
-  //         filteredContacts: currentState.contacts,
-  //         searchQuery: null,
-  //         activeCategory: null,
-  //       ),
-  //     );
+  //     emit(ContactsLoading());
+  //     try {
+  //       final contacts = await _filterContactsUseCase.execute(event.categoryId);
+  //
+  //       emit(ContactsLoaded(contacts: contacts));
+  //     } catch (e) {
+  //       emit(ContactsError('Failed to edit contact: ${e.toString()}'));
+  //     }
   //   }
   // }
-  //
 }

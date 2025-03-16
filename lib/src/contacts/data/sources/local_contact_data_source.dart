@@ -34,4 +34,9 @@ class LocalContactDataSource implements ContactDataSource {
   Future<List<ContactModel>> searchContact({required String searchQuery}) {
     return _contactDao.searchContacts(searchQuery);
   }
+
+  @override
+  Future<List<ContactModel>> filterContacts({required int categoryId}) {
+    return _contactDao.filterContacts(categoryId);
+  }
 }

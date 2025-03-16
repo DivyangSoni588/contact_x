@@ -1,15 +1,21 @@
 import 'package:contact_x/core/constants/app_route_constants.dart';
 import 'package:contact_x/core/extensions/context_extension.dart';
+import 'package:contact_x/core/resources/app_colors.dart';
 import 'package:contact_x/core/resources/app_string_keys.dart';
 import 'package:contact_x/core/resources/app_text_style.dart';
 import 'package:contact_x/core/widgets/app_circular_image.dart';
 import 'package:contact_x/core/widgets/app_text_field.dart';
 import 'package:contact_x/core/widgets/app_text_widget.dart';
 import 'package:contact_x/core/widgets/common_app_bar.dart';
+import 'package:contact_x/src/category/domain/models/category.dart';
+import 'package:contact_x/src/category/presentation/add_or_edit_category_bloc/category_bloc.dart';
+import 'package:contact_x/src/category/presentation/add_or_edit_category_bloc/category_event.dart';
+import 'package:contact_x/src/category/presentation/add_or_edit_category_bloc/category_state.dart';
 import 'package:contact_x/src/contacts/domain/models/contact.dart';
 import 'package:contact_x/src/contacts/presentation/contacts_bloc/contacts_bloc.dart';
 import 'package:contact_x/src/contacts/presentation/contacts_bloc/contacts_event.dart';
 import 'package:contact_x/src/contacts/presentation/contacts_bloc/contacts_state.dart';
+import 'package:contact_x/src/contacts/presentation/widgets/filter_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,10 +32,15 @@ class _ContactListScreenState extends State<ContactListScreen> {
   final TextEditingController _searchContactController =
       TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  // Add a state variable to track the selected category
+  Category? _selectedCategory;
+
   @override
   void initState() {
     super.initState();
     context.read<ContactsBloc>().add(GetAllContactsEvent());
+    context.read<CategoryBloc>().add(LoadCategories());
     addSearchTextControllerListener();
   }
 
@@ -46,7 +57,72 @@ class _ContactListScreenState extends State<ContactListScreen> {
       appBar: CommonAppBar(
         appBarTitle: AppStringKeys.contactList,
         actionWidgets: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.filter_alt)),
+          BlocBuilder<CategoryBloc, CategoryState>(
+            builder: (context, categoryState) {
+              if (categoryState is CategoryLoading) {
+                return Center(child: CircularProgressIndicator());
+              } else if (categoryState is CategoryError) {
+                return Text(
+                  categoryState.message,
+                  style: TextStyle(color: Colors.red),
+                );
+              } else if (categoryState is CategoryLoaded) {
+                return Row(
+                  children: [
+                    if (_selectedCategory != null)
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.lightOrange,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _selectedCategory?.name ?? '',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            InkWell(
+                              onTap: () {
+                                _clearFilter();
+                              },
+                              child: Icon(Icons.close, size: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    IconButton(
+                      onPressed: () {
+                        _showFilterDialogWidget(
+                          categoryState.categories,
+                          _selectedCategory,
+                          _applyFilter,
+                        );
+                      },
+                      icon: Icon(
+                        Icons.filter_alt,
+                        // Change icon color when filter is applied
+                        color:
+                            _selectedCategory != null
+                                ? Theme.of(context).primaryColor
+                                : null,
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                return SizedBox();
+              }
+            },
+          ),
         ],
       ),
       body: Column(
@@ -243,10 +319,73 @@ class _ContactListScreenState extends State<ContactListScreen> {
     _searchContactController.addListener(() {
       final String searchText = _searchContactController.text.trim();
       if (searchText.isEmpty) {
-        context.read<ContactsBloc>().add(GetAllContactsEvent());
+        _reloadContacts();
       } else {
         context.read<ContactsBloc>().add(SearchContactEvent(searchText));
       }
     });
+  }
+
+  void _showFilterDialogWidget(
+    List<Category> categories,
+    Category? selectedCategory,
+    Function(Category?) onApply,
+  ) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => FilterDialogWidget(
+            categories: categories,
+            selectedCategory: selectedCategory,
+            onApply: onApply,
+          ),
+    );
+  }
+
+  // New method to apply the filter
+  void _applyFilter(Category? category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+
+    // Apply the filter to the contacts
+    _reloadContacts();
+  }
+
+  // New method to clear the filter
+  void _clearFilter() {
+    setState(() {
+      _selectedCategory = null;
+    });
+
+    // Reload all contacts without filter
+    _reloadContacts();
+  }
+
+  // Helper method to reload contacts with current filter
+  void _reloadContacts() {
+    if (_selectedCategory != null) {
+      context.read<ContactsBloc>().add(
+        FilterContactsByCategoryEvent(_getCategoryId() ?? -1),
+      );
+    } else if (_searchContactController.text.isNotEmpty) {
+      context.read<ContactsBloc>().add(
+        SearchContactEvent(_searchContactController.text),
+      );
+    } else {
+      context.read<ContactsBloc>().add(GetAllContactsEvent());
+    }
+  }
+
+  // Helper method to get the categoryId from the selected category name
+  int? _getCategoryId() {
+    if (_selectedCategory == null) {
+      return null;
+    }
+
+    // You need to implement a way to get the categoryId from the category name
+    // This depends on how your categories are stored
+    // For now, we'll assume the category name is the same as the categoryId
+    return _selectedCategory?.id;
   }
 }
