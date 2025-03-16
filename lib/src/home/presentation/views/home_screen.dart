@@ -42,109 +42,118 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: AppDrawer(),
-      appBar: CommonAppBar(
-        leadingWidget: Builder(
-          builder: (context) {
-            return IconButton(
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-              icon: Icon(Icons.menu),
-            );
-          },
-        ),
-        appBarTitle: AppStringKeys.createAndStoreCategory,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            children: [
-              SizedBox(height: 60),
-              AppTextField(
-                textEditingController: addCategoryController,
-                hintText: context.appLocalizations.translate(
-                  AppStringKeys.addCategory,
-                ),
-              ),
-              SizedBox(height: 34),
-              ElevatedButton(
+    return BlocListener<CategoryBloc, CategoryState>(
+      listener: (context, state) {
+        if (state is CategoryDuplicateError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: Scaffold(
+        drawer: AppDrawer(),
+        appBar: CommonAppBar(
+          leadingWidget: Builder(
+            builder: (context) {
+              return IconButton(
                 onPressed: () {
-                  final text = addCategoryController.text.trim();
-                  if (text.isNotEmpty) {
-                    context.read<CategoryBloc>().add(
-                      AddCategory(Category(name: text)),
-                    );
-                    addCategoryController.clear();
-                  } else {
-                    AppUIHelper.showSnackBar(
-                      context: context,
-                      message: context.appLocalizations.translate(
-                        AppStringKeys.categoryAddError,
-                      ),
-                    );
-                  }
+                  Scaffold.of(context).openDrawer();
                 },
-                child: AppTextWidget(
-                  text: AppStringKeys.save,
-                  textStyle: AppTextStyle.boldFont,
+                icon: Icon(Icons.menu),
+              );
+            },
+          ),
+          appBarTitle: AppStringKeys.createAndStoreCategory,
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              children: [
+                SizedBox(height: 60),
+                AppTextField(
+                  textEditingController: addCategoryController,
+                  hintText: context.appLocalizations.translate(
+                    AppStringKeys.addCategory,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: BlocBuilder<CategoryBloc, CategoryState>(
-                  builder: (context, state) {
-                    if (state is CategoryLoading) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (state is CategoryLoaded) {
-                      if (state.categories.isEmpty) {
-                        return Align(
-                          alignment: Alignment.center,
-                          child: AppTextWidget(
-                            text: AppStringKeys.noDataFound,
-                            textStyle: AppTextStyle.regularBoldFont,
-                          ),
-                        );
-                      }
-                      return ListView.builder(
-                        itemCount: state.categories.length,
-                        padding: EdgeInsets.only(top: 32),
-                        itemBuilder: (context, index) {
-                          final Category category = state.categories[index];
-                          return ListTile(
-                            title: Text(category.name),
-                            tileColor: AppColors.lightOrange,
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    showEditCategoryDialog(context, category);
-                                  },
-                                  icon: Icon(Icons.edit),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    context.read<CategoryBloc>().add(
-                                      DeleteCategory(category.id ?? -1),
-                                    );
-                                  },
-                                  icon: Icon(Icons.delete),
-                                ),
-                              ],
+                SizedBox(height: 34),
+                ElevatedButton(
+                  onPressed: () {
+                    final text = addCategoryController.text.trim();
+                    if (text.isNotEmpty) {
+                      context.read<CategoryBloc>().add(
+                        AddCategory(Category(name: text)),
+                      );
+                      addCategoryController.clear();
+                    } else {
+                      AppUIHelper.showSnackBar(
+                        context: context,
+                        message: context.appLocalizations.translate(
+                          AppStringKeys.categoryAddError,
+                        ),
+                      );
+                    }
+                  },
+                  child: AppTextWidget(
+                    text: AppStringKeys.save,
+                    textStyle: AppTextStyle.boldFont,
+                  ),
+                ),
+                Expanded(
+                  child: BlocBuilder<CategoryBloc, CategoryState>(
+                    builder: (context, state) {
+                      if (state is CategoryLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (state is CategoryLoaded) {
+                        if (state.categories.isEmpty) {
+                          return Align(
+                            alignment: Alignment.center,
+                            child: AppTextWidget(
+                              text: AppStringKeys.noDataFound,
+                              textStyle: AppTextStyle.regularBoldFont,
                             ),
                           );
-                        },
-                      );
-                    } else if (state is CategoryError) {
-                      return Center(child: Text("Error: ${state.message}"));
-                    }
-                    return Container();
-                  },
+                        }
+                        return ListView.builder(
+                          itemCount: state.categories.length,
+                          padding: EdgeInsets.only(top: 32),
+                          itemBuilder: (context, index) {
+                            final Category category = state.categories[index];
+                            return ListTile(
+                              title: Text(category.name),
+                              tileColor: AppColors.lightOrange,
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      showEditCategoryDialog(context, category);
+                                    },
+                                    icon: Icon(Icons.edit),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      context.read<CategoryBloc>().add(
+                                        DeleteCategory(category.id ?? -1),
+                                      );
+                                    },
+                                    icon: Icon(Icons.delete),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      } else if (state is CategoryError) {
+                        return Center(child: Text("Error: ${state.message}"));
+                      }
+                      return Container();
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -160,10 +169,15 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Edit Category"),
-          content: TextField(
-            controller: categoryController,
-            decoration: InputDecoration(hintText: "Enter category name"),
+          title: AppTextWidget(
+            text: AppStringKeys.enterCategoryName,
+            textStyle: AppTextStyle.regularBoldFont,
+          ),
+          content: AppTextField(
+            textEditingController: categoryController,
+            hintText: context.appLocalizations.translate(
+              AppStringKeys.enterCategoryName,
+            ),
           ),
           actions: [
             TextButton(

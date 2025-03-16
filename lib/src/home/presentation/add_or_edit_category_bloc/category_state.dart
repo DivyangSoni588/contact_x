@@ -25,3 +25,8 @@ class CategoryError extends CategoryState {
   @override
   List<Object> get props => [message];
 }
+
+class CategoryDuplicateError extends CategoryState {
+  final String message;
+  CategoryDuplicateError(this.message);
+}

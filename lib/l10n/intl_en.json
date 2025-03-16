@@ -6,5 +6,6 @@
   "contact_list": "Contact List",
   "save": "Save",
   "no_data_found": "No Data Found",
-  "category_add_error": "Category name cannot be empty"
+  "category_add_error": "Category name cannot be empty",
+  "enter_category_name": "Enter Category Name"
 }

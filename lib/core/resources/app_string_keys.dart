@@ -2,6 +2,7 @@ class AppStringKeys {
   const AppStringKeys._();
 
   static const String appName = 'app_name';
+  static const String enterCategoryName = 'enter_category_name';
   static const String noDataFound = 'no_data_found';
   static const String createAndStoreCategory = 'create_and_store_category';
   static const String addContacts = 'add_contacts';

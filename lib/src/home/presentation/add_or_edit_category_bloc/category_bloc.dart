@@ -43,6 +43,20 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     Emitter<CategoryState> emit,
   ) async {
     try {
+      final currentState = state;
+      if (currentState is CategoryLoaded) {
+        bool isDuplicate = currentState.categories.any(
+          (category) =>
+              category.name.toLowerCase() == event.category.name.toLowerCase(),
+        );
+
+        if (isDuplicate) {
+          emit(CategoryDuplicateError("Category already exists"));
+          emit(CategoryLoaded(currentState.categories));
+          return;
+        }
+      }
+
       await _addCategoryUseCase.execute(event.category);
       add(LoadCategories()); // Refresh the list after adding
     } catch (e) {
@@ -55,6 +69,20 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     Emitter<CategoryState> emit,
   ) async {
     try {
+      final currentState = state;
+      if (currentState is CategoryLoaded) {
+        bool isDuplicate = currentState.categories.any(
+          (category) =>
+              category.name.toLowerCase() == event.category.name.toLowerCase(),
+        );
+
+        if (isDuplicate) {
+          emit(CategoryDuplicateError("Category already exists"));
+          emit(CategoryLoaded(currentState.categories));
+          return;
+        }
+      }
+
       await _editCategoryUseCase.execute(category: event.category);
       add(LoadCategories()); // Refresh the list after updating
     } catch (e) {
