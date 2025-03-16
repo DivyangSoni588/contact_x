@@ -1,5 +1,5 @@
-import 'package:contact_x/src/add_contacts/presentation/views/add_contacts_screen.dart';
-import 'package:contact_x/src/home/presentation/views/home_screen.dart';
+import 'package:contact_x/src/category/presentation/views/home_screen.dart';
+import 'package:contact_x/src/contacts/presentation/views/add_contacts_screen.dart';
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
