@@ -1,0 +1,10 @@
+{
+  "app_name": "ContactX",
+  "create_and_store_category": "Create And Store Category",
+  "add_contacts": "Add Contacts",
+  "add_category": "Add Category",
+  "contact_list": "Contact List",
+  "save": "Save",
+  "no_data_found": "No Data Found",
+  "category_add_error": "Category name cannot be empty"
+}
