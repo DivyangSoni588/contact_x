@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:contact_x/core/constants/app_route_constants.dart';
 import 'package:contact_x/core/extensions/context_extension.dart';
 import 'package:contact_x/core/resources/app_colors.dart';
@@ -29,11 +31,8 @@ class ContactListScreen extends StatefulWidget {
 }
 
 class _ContactListScreenState extends State<ContactListScreen> {
-  final TextEditingController _searchContactController =
-      TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-
-  // Add a state variable to track the selected category
+  final TextEditingController _searchContactController = TextEditingController();
+  final _selectedCategoryController = StreamController<Category?>.broadcast();
   Category? _selectedCategory;
 
   @override
@@ -47,7 +46,7 @@ class _ContactListScreenState extends State<ContactListScreen> {
   @override
   void dispose() {
     _searchContactController.dispose();
-    _focusNode.dispose();
+    _selectedCategoryController.close();
     super.dispose();
   }
 
@@ -62,61 +61,56 @@ class _ContactListScreenState extends State<ContactListScreen> {
               if (categoryState is CategoryLoading) {
                 return Center(child: CircularProgressIndicator());
               } else if (categoryState is CategoryError) {
-                return Text(
-                  categoryState.message,
-                  style: TextStyle(color: Colors.red),
-                );
+                return Text(categoryState.message, style: TextStyle(color: Colors.red));
               } else if (categoryState is CategoryLoaded) {
-                return Row(
-                  children: [
-                    if (_selectedCategory != null)
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightOrange,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _selectedCategory?.name ?? '',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
+                return StreamBuilder<Category?>(
+                  stream: _selectedCategoryController.stream,
+                  initialData: _selectedCategory,
+                  builder: (context, snapshot) {
+                    final selectedCategory = snapshot.data;
+
+                    return Row(
+                      children: [
+                        if (selectedCategory != null)
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.lightOrange,
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            SizedBox(width: 4),
-                            InkWell(
-                              onTap: () {
-                                _clearFilter();
-                              },
-                              child: Icon(Icons.close, size: 14),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  selectedCategory.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                ),
+                                SizedBox(width: 4),
+                                InkWell(
+                                  onTap: () {
+                                    _clearFilter();
+                                  },
+                                  child: Icon(Icons.close, size: 14),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
+                        IconButton(
+                          onPressed: () {
+                            _showFilterDialogWidget(
+                              categoryState.categories,
+                              selectedCategory,
+                              _applyFilter,
+                            );
+                          },
+                          icon: Icon(
+                            Icons.filter_alt,
+                            color: selectedCategory != null ? Theme.of(context).primaryColor : null,
+                          ),
                         ),
-                      ),
-                    IconButton(
-                      onPressed: () {
-                        _showFilterDialogWidget(
-                          categoryState.categories,
-                          _selectedCategory,
-                          _applyFilter,
-                        );
-                      },
-                      icon: Icon(
-                        Icons.filter_alt,
-                        // Change icon color when filter is applied
-                        color:
-                            _selectedCategory != null
-                                ? Theme.of(context).primaryColor
-                                : null,
-                      ),
-                    ),
-                  ],
+                      ],
+                    );
+                  },
                 );
               } else {
                 return SizedBox();
@@ -132,9 +126,7 @@ class _ContactListScreenState extends State<ContactListScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: AppTextField(
               textEditingController: _searchContactController,
-              hintText: context.appLocalizations.translate(
-                AppStringKeys.searchContacts,
-              ),
+              hintText: context.appLocalizations.translate(AppStringKeys.searchContacts),
             ),
           ),
           Expanded(
@@ -145,12 +137,7 @@ class _ContactListScreenState extends State<ContactListScreen> {
                 } else if (state is ContactsLoaded) {
                   return _buildContactList(state.contacts);
                 } else if (state is ContactsError) {
-                  return Center(
-                    child: Text(
-                      state.message,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  );
+                  return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
                 }
                 return const Center(child: Text("No contacts found."));
               },
@@ -164,10 +151,7 @@ class _ContactListScreenState extends State<ContactListScreen> {
   Widget _buildContactList(List<ContactModel> contacts) {
     if (contacts.isEmpty) {
       return Center(
-        child: AppTextWidget(
-          text: AppStringKeys.noDataFound,
-          textStyle: AppTextStyle.regularBoldFont,
-        ),
+        child: AppTextWidget(text: AppStringKeys.noDataFound, textStyle: AppTextStyle.regularBoldFont),
       );
     }
 
@@ -179,15 +163,10 @@ class _ContactListScreenState extends State<ContactListScreen> {
         final contact = contacts[index];
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: ListTile(
             leading: AppCircularImage(size: 40, imagePath: contact.image),
-            title: Text(
-              contact.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            title: Text(contact.name, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(contact.phone),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -202,17 +181,12 @@ class _ContactListScreenState extends State<ContactListScreen> {
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
                     if (contact.id != null) {
-                      context.read<ContactsBloc>().add(
-                        DeleteContactEvent(contact.id!),
-                      );
+                      context.read<ContactsBloc>().add(DeleteContactEvent(contact.id!));
                     }
                   },
                 ),
               ],
             ),
-            onTap: () {
-              // Navigator.pushNamed(context, AppRouteConstants.editContactScreen, arguments: contact);
-            },
           ),
         );
       },
@@ -220,22 +194,14 @@ class _ContactListScreenState extends State<ContactListScreen> {
   }
 
   void _showEditContactBottomSheet(BuildContext context, ContactModel contact) {
-    TextEditingController firstNameController = TextEditingController(
-      text: contact.name,
-    );
-    TextEditingController phoneController = TextEditingController(
-      text: contact.phone,
-    );
-    TextEditingController emailController = TextEditingController(
-      text: contact.email,
-    );
+    TextEditingController firstNameController = TextEditingController(text: contact.name);
+    TextEditingController phoneController = TextEditingController(text: contact.phone);
+    TextEditingController emailController = TextEditingController(text: contact.email);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (BuildContext context) {
         return Padding(
           padding: EdgeInsets.only(
@@ -247,18 +213,12 @@ class _ContactListScreenState extends State<ContactListScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppTextWidget(
-                text: AppStringKeys.editContact,
-                textStyle: AppTextStyle.regularBoldFont,
-              ),
+              AppTextWidget(text: AppStringKeys.editContact, textStyle: AppTextStyle.regularBoldFont),
 
               SizedBox(height: 10),
 
               // First Name
-              AppTextField(
-                textEditingController: firstNameController,
-                hintText: AppStringKeys.lastName,
-              ),
+              AppTextField(textEditingController: firstNameController, hintText: AppStringKeys.lastName),
               SizedBox(height: 20),
               // Email
               AppTextField(
@@ -289,22 +249,17 @@ class _ContactListScreenState extends State<ContactListScreen> {
                     );
 
                     // Dispatch update event
-                    context.read<ContactsBloc>().add(
-                      EditContactEvent(updatedContact),
-                    );
+                    context.read<ContactsBloc>().add(EditContactEvent(updatedContact));
 
                     // Close bottom sheet
                     Navigator.pop(context);
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Please enter valid details!")),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text("Please enter valid details!")));
                   }
                 },
-                child: AppTextWidget(
-                  text: AppStringKeys.save,
-                  textStyle: AppTextStyle.boldFont,
-                ),
+                child: AppTextWidget(text: AppStringKeys.save, textStyle: AppTextStyle.boldFont),
               ),
 
               SizedBox(height: 64),
@@ -321,6 +276,7 @@ class _ContactListScreenState extends State<ContactListScreen> {
       if (searchText.isEmpty) {
         _reloadContacts();
       } else {
+        _clearFilter();
         context.read<ContactsBloc>().add(SearchContactEvent(searchText));
       }
     });
@@ -342,36 +298,26 @@ class _ContactListScreenState extends State<ContactListScreen> {
     );
   }
 
-  // New method to apply the filter
   void _applyFilter(Category? category) {
-    setState(() {
-      _selectedCategory = category;
-    });
-
-    // Apply the filter to the contacts
+    _selectedCategory = category;
+    _selectedCategoryController.add(category);
     _reloadContacts();
   }
 
-  // New method to clear the filter
   void _clearFilter() {
-    setState(() {
-      _selectedCategory = null;
-    });
-
-    // Reload all contacts without filter
+    _selectedCategory = null;
+    _selectedCategoryController.add(null);
     _reloadContacts();
   }
 
-  // Helper method to reload contacts with current filter
-  void _reloadContacts() {
+  void _reloadContacts() async {
     if (_selectedCategory != null) {
-      context.read<ContactsBloc>().add(
-        FilterContactsByCategoryEvent(_getCategoryId() ?? -1),
-      );
+      _searchContactController.clear();
+      await Future.delayed(Duration(milliseconds: 500));
+
+      filterContacts();
     } else if (_searchContactController.text.isNotEmpty) {
-      context.read<ContactsBloc>().add(
-        SearchContactEvent(_searchContactController.text),
-      );
+      context.read<ContactsBloc>().add(SearchContactEvent(_searchContactController.text));
     } else {
       context.read<ContactsBloc>().add(GetAllContactsEvent());
     }
@@ -383,9 +329,10 @@ class _ContactListScreenState extends State<ContactListScreen> {
       return null;
     }
 
-    // You need to implement a way to get the categoryId from the category name
-    // This depends on how your categories are stored
-    // For now, we'll assume the category name is the same as the categoryId
     return _selectedCategory?.id;
+  }
+
+  void filterContacts() {
+    context.read<ContactsBloc>().add(FilterContactsByCategoryEvent(_getCategoryId() ?? -1));
   }
 }
