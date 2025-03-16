@@ -1,13 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-abstract class ContactState extends Equatable {
+abstract class AddContactState extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class ContactInitial extends ContactState {}
+class ContactInitial extends AddContactState {}
 
-class ContactValidationState extends ContactState {
+class ContactValidationState extends AddContactState {
   final String? firstNameError;
   final String? lastNameError;
   final String? emailError;
@@ -70,9 +70,9 @@ class _Unset {
   const _Unset();
 }
 
-class ContactAdded extends ContactState {}
+class ContactAdded extends AddContactState {}
 
-class ContactError extends ContactState {
+class ContactError extends AddContactState {
   final String message;
   ContactError(this.message);
 

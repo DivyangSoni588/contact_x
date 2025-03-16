@@ -9,10 +9,14 @@ import 'category_event.dart';
 import 'category_state.dart';
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  final GetAllCategoryUseCase _getAllCategoryUseCase = GetIt.instance.get<GetAllCategoryUseCase>();
-  final AddCategoryUseCase _addCategoryUseCase = GetIt.instance.get<AddCategoryUseCase>();
-  final DeleteCategoryUseCase _deleteCategoryUseCase = GetIt.instance.get<DeleteCategoryUseCase>();
-  final EditCategoryUseCase _editCategoryUseCase = GetIt.instance.get<EditCategoryUseCase>();
+  final GetAllCategoryUseCase _getAllCategoryUseCase =
+      GetIt.instance.get<GetAllCategoryUseCase>();
+  final AddCategoryUseCase _addCategoryUseCase =
+      GetIt.instance.get<AddCategoryUseCase>();
+  final DeleteCategoryUseCase _deleteCategoryUseCase =
+      GetIt.instance.get<DeleteCategoryUseCase>();
+  final EditCategoryUseCase _editCategoryUseCase =
+      GetIt.instance.get<EditCategoryUseCase>();
 
   CategoryBloc() : super(CategoryInitial()) {
     on<LoadCategories>(_onLoadCategories);
@@ -21,7 +25,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<DeleteCategory>(_onDeleteCategory);
   }
 
-  Future<void> _onLoadCategories(LoadCategories event, Emitter<CategoryState> emit) async {
+  Future<void> _onLoadCategories(
+    LoadCategories event,
+    Emitter<CategoryState> emit,
+  ) async {
     emit(CategoryLoading());
     try {
       final categories = await _getAllCategoryUseCase.execute();
@@ -31,12 +38,16 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onAddCategory(AddCategory event, Emitter<CategoryState> emit) async {
+  Future<void> _onAddCategory(
+    AddCategory event,
+    Emitter<CategoryState> emit,
+  ) async {
     try {
       final currentState = state;
       if (currentState is CategoryLoaded) {
         bool isDuplicate = currentState.categories.any(
-          (category) => category.name.toLowerCase() == event.category.name.toLowerCase(),
+          (category) =>
+              category.name.toLowerCase() == event.category.name.toLowerCase(),
         );
 
         if (isDuplicate) {
@@ -53,12 +64,16 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onUpdateCategory(UpdateCategory event, Emitter<CategoryState> emit) async {
+  Future<void> _onUpdateCategory(
+    UpdateCategory event,
+    Emitter<CategoryState> emit,
+  ) async {
     try {
       final currentState = state;
       if (currentState is CategoryLoaded) {
         bool isDuplicate = currentState.categories.any(
-          (category) => category.name.toLowerCase() == event.category.name.toLowerCase(),
+          (category) =>
+              category.name.toLowerCase() == event.category.name.toLowerCase(),
         );
 
         if (isDuplicate) {
@@ -75,7 +90,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     }
   }
 
-  Future<void> _onDeleteCategory(DeleteCategory event, Emitter<CategoryState> emit) async {
+  Future<void> _onDeleteCategory(
+    DeleteCategory event,
+    Emitter<CategoryState> emit,
+  ) async {
     try {
       await _deleteCategoryUseCase.execute(event.categoryId);
       add(LoadCategories()); // Refresh the list after deleting

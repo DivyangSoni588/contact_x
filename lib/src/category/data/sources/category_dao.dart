@@ -9,7 +9,9 @@ class CategoryDao {
 
   Future<List<Category>> getCategories() async {
     final db = await DatabaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(DatabaseHelper.categoryTable);
+    final List<Map<String, dynamic>> maps = await db.query(
+      DatabaseHelper.categoryTable,
+    );
     return maps.map((e) => Category.fromMap(e)).toList();
   }
 
@@ -25,6 +27,10 @@ class CategoryDao {
 
   Future<int> deleteCategory(int id) async {
     final db = await DatabaseHelper.database;
-    return await db.delete(DatabaseHelper.categoryTable, where: 'id = ?', whereArgs: [id]);
+    return await db.delete(
+      DatabaseHelper.categoryTable,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

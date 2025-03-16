@@ -1,5 +1,6 @@
 import 'package:contact_x/core/constants/app_route_constants.dart';
 import 'package:contact_x/core/extensions/context_extension.dart';
+import 'package:contact_x/core/helper/app_contact_helper.dart';
 import 'package:contact_x/core/helper/app_image_picker_helper.dart';
 import 'package:contact_x/core/helper/app_ui_helper.dart';
 import 'package:contact_x/core/resources/app_string_keys.dart';
@@ -9,14 +10,16 @@ import 'package:contact_x/core/widgets/app_dropdown_field.dart';
 import 'package:contact_x/core/widgets/app_text_field.dart';
 import 'package:contact_x/core/widgets/app_text_widget.dart';
 import 'package:contact_x/core/widgets/common_app_bar.dart';
+import 'package:contact_x/core/widgets/confirmation_dialog_widget.dart';
 import 'package:contact_x/src/category/domain/models/category.dart';
 import 'package:contact_x/src/category/presentation/add_or_edit_category_bloc/category_bloc.dart';
 import 'package:contact_x/src/category/presentation/add_or_edit_category_bloc/category_event.dart';
 import 'package:contact_x/src/category/presentation/add_or_edit_category_bloc/category_state.dart';
 import 'package:contact_x/src/contacts/domain/models/contact.dart';
-import 'package:contact_x/src/contacts/presentation/contact_bloc/contact_bloc.dart';
-import 'package:contact_x/src/contacts/presentation/contact_bloc/contact_event.dart';
-import 'package:contact_x/src/contacts/presentation/contact_bloc/contact_state.dart';
+import 'package:contact_x/src/contacts/presentation/add_contact_bloc/add_contact_bloc.dart';
+import 'package:contact_x/src/contacts/presentation/add_contact_bloc/add_contact_event.dart';
+import 'package:contact_x/src/contacts/presentation/add_contact_bloc/add_contact_state.dart';
+import 'package:contact_x/src/contacts/presentation/views/contact_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,7 +56,7 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ContactBloc, ContactState>(
+    return BlocBuilder<AddContactBloc, AddContactState>(
       builder: (context, state) {
         String? firstNameError;
         String? lastNameError;
@@ -73,20 +76,26 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: ListView(
                 children: [
                   SizedBox(height: 32),
-                  GestureDetector(
-                    onTap: () async {
-                      final imagePath = await showImagePickerBottomSheet(context: context);
-                      if (imagePath != null) {
-                        if (context.mounted) {
-                          context.read<ContactBloc>().add(SetContactImage(imagePath));
+                  Align(
+                    alignment: Alignment.center,
+                    child: GestureDetector(
+                      onTap: () async {
+                        final imagePath = await showImagePickerBottomSheet(
+                          context: context,
+                        );
+                        if (imagePath != null) {
+                          if (context.mounted) {
+                            context.read<AddContactBloc>().add(
+                              SetContactImage(imagePath),
+                            );
+                          }
                         }
-                      }
-                    },
-                    child: AppCircularImage(imagePath: userImage),
+                      },
+                      child: AppCircularImage(imagePath: userImage),
+                    ),
                   ),
                   SizedBox(height: 12),
                   AppTextField(
@@ -121,7 +130,10 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
                       if (categoryState is CategoryLoading) {
                         return Center(child: CircularProgressIndicator());
                       } else if (categoryState is CategoryError) {
-                        return Text(categoryState.message, style: TextStyle(color: Colors.red));
+                        return Text(
+                          categoryState.message,
+                          style: TextStyle(color: Colors.red),
+                        );
                       } else if (categoryState is CategoryLoaded) {
                         // Get the current selected category from ContactState
                         dynamic selectedCategory;
@@ -130,10 +142,15 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
                         }
 
                         return AppDropdownField(
-                          items: categoryState.categories.map((category) => category.name).toList(),
+                          items:
+                              categoryState.categories
+                                  .map((category) => category.name)
+                                  .toList(),
                           selectedValue: selectedCategory,
                           onChanged: (value) {
-                            context.read<ContactBloc>().add(SelectCategory(value));
+                            context.read<AddContactBloc>().add(
+                              SelectCategory(value),
+                            );
                           },
                           hintText: getText(AppStringKeys.category),
                         );
@@ -153,7 +170,10 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
                     onPressed: () {
                       _submitForm();
                     },
-                    child: AppTextWidget(text: AppStringKeys.save, textStyle: AppTextStyle.boldFont),
+                    child: AppTextWidget(
+                      text: AppStringKeys.save,
+                      textStyle: AppTextStyle.boldFont,
+                    ),
                   ),
                 ],
               ),
@@ -168,9 +188,9 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
     return context.appLocalizations.translate(text);
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     // Get current state values
-    final contactState = context.read<ContactBloc>().state;
+    final contactState = context.read<AddContactBloc>().state;
     String? imagePath;
     dynamic selectedCategory;
 
@@ -191,7 +211,10 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
     }
 
     if (categoryId == null) {
-      AppUIHelper.showSnackBar(context: context, message: 'Please choose or add category');
+      AppUIHelper.showSnackBar(
+        context: context,
+        message: 'Please choose or add category',
+      );
       return;
     }
 
@@ -203,22 +226,22 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
 
     // Check if any required field is empty
     if (firstName.isEmpty) {
-      context.read<ContactBloc>().add(ValidateFirstName(''));
+      context.read<AddContactBloc>().add(ValidateFirstName(''));
       return;
     }
 
     if (lastName.isEmpty) {
-      context.read<ContactBloc>().add(ValidateLastName(''));
+      context.read<AddContactBloc>().add(ValidateLastName(''));
       return;
     }
 
     if (email.isEmpty) {
-      context.read<ContactBloc>().add(ValidateEmail(''));
+      context.read<AddContactBloc>().add(ValidateEmail(''));
       return;
     }
 
     if (phone.isEmpty) {
-      context.read<ContactBloc>().add(ValidateMobileNumber(''));
+      context.read<AddContactBloc>().add(ValidateMobileNumber(''));
       return;
     }
 
@@ -243,29 +266,66 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
       image: imagePath,
       categoryId: categoryId,
     );
+    context.read<AddContactBloc>().add(AddContact(contact: contactModel));
+    await _showSaveContactDialog(context: context, contact: contactModel);
+    await Future.delayed(Duration(milliseconds: 300));
+    navigateToContactListScreen();
+  }
 
-    context.read<ContactBloc>().add(AddContact(contact: contactModel));
+  Future<void> _showSaveContactDialog({
+    required BuildContext context,
+    required ContactModel contact,
+  }) async {
+    await showDialog(
+      context: context,
+      builder:
+          (context) => ConfirmationDialogWidget(
+            title: AppStringKeys.appName,
+            message: AppStringKeys.saveToDeviceMessage,
+            onConfirm: () {
+              Navigator.pop(context);
+              AppContactHelper.saveContact(
+                name: contact.name,
+                phoneNumber: contact.phone,
+                imagePath: contact.image,
+              );
+            },
+            onCancel: () {
+              Navigator.pop(context);
+            },
+          ),
+    );
   }
 
   void addListenersToControllers() {
     _mobileNumberController.addListener(() {
-      context.read<ContactBloc>().add(ValidateMobileNumber(_mobileNumberController.text));
+      context.read<AddContactBloc>().add(
+        ValidateMobileNumber(_mobileNumberController.text),
+      );
     });
     _firstNameController.addListener(() {
-      context.read<ContactBloc>().add(ValidateFirstName(_firstNameController.text));
+      context.read<AddContactBloc>().add(
+        ValidateFirstName(_firstNameController.text),
+      );
     });
     _lastNameController.addListener(() {
-      context.read<ContactBloc>().add(ValidateLastName(_lastNameController.text));
+      context.read<AddContactBloc>().add(
+        ValidateLastName(_lastNameController.text),
+      );
     });
     _emailController.addListener(() {
-      context.read<ContactBloc>().add(ValidateEmail(_emailController.text));
+      context.read<AddContactBloc>().add(ValidateEmail(_emailController.text));
     });
   }
 
-  static Future<String?> showImagePickerBottomSheet({required BuildContext context}) {
+  static Future<String?> showImagePickerBottomSheet({
+    required BuildContext context,
+  }) {
     return showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -274,9 +334,13 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
             children: [
               ListTile(
                 leading: Icon(Icons.camera_alt, color: Colors.blue),
-                title: AppTextWidget(text: AppStringKeys.camera, textStyle: AppTextStyle.regularFont),
+                title: AppTextWidget(
+                  text: AppStringKeys.camera,
+                  textStyle: AppTextStyle.regularFont,
+                ),
                 onTap: () async {
-                  final image = await AppImagePickerHelper().pickImageFromCamera();
+                  final image =
+                      await AppImagePickerHelper().pickImageFromCamera();
                   if (context.mounted) {
                     Navigator.pop(context, image);
                   }
@@ -284,9 +348,13 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.photo_library, color: Colors.green),
-                title: AppTextWidget(text: AppStringKeys.gallery, textStyle: AppTextStyle.regularFont),
+                title: AppTextWidget(
+                  text: AppStringKeys.gallery,
+                  textStyle: AppTextStyle.regularFont,
+                ),
                 onTap: () async {
-                  final image = await AppImagePickerHelper().pickImageFromGallery();
+                  final image =
+                      await AppImagePickerHelper().pickImageFromGallery();
                   if (context.mounted) {
                     Navigator.pop(context, image);
                   }
@@ -298,5 +366,9 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
         );
       },
     );
+  }
+
+  void navigateToContactListScreen() {
+    Navigator.pushReplacementNamed(context, ContactListScreen.routeName);
   }
 }

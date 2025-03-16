@@ -15,5 +15,8 @@
   "mobile_number": "Mobile Number",
   "category": "Category",
   "camera": "Camera",
-  "gallery": "Gallery"
+  "gallery": "Gallery",
+  "save_to_device_message": "Do you want to store this contact in your phone?",
+  "edit_contact": "Edit Contact",
+  "search_contacts": "Search Contacts"
 }

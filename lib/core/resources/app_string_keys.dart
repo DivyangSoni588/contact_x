@@ -2,10 +2,12 @@ class AppStringKeys {
   const AppStringKeys._();
 
   static const String appName = 'app_name';
+  static const String editContact = 'edit_contact';
   static const String enterCategoryName = 'enter_category_name';
   static const String noDataFound = 'no_data_found';
   static const String createAndStoreCategory = 'create_and_store_category';
   static const String addContacts = 'add_contacts';
+  static const String searchContacts = 'search_contacts';
   static const String addCategory = 'add_category';
   static const String contactList = 'contact_list';
   static const String save = 'save';
@@ -18,4 +20,5 @@ class AppStringKeys {
   static const String category = 'category';
   static const String camera = 'camera';
   static const String gallery = 'gallery';
+  static const String saveToDeviceMessage = 'save_to_device_message';
 }

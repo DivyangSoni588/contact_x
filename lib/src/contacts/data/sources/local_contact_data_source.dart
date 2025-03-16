@@ -12,4 +12,26 @@ class LocalContactDataSource implements ContactDataSource {
     _contactDao.insertContact(contact);
     return Future.value();
   }
+
+  @override
+  Future<List<ContactModel>> getAllContacts() {
+    return _contactDao.getContacts();
+  }
+
+  @override
+  Future<void> deleteContact({required int id}) {
+    _contactDao.deleteContact(id);
+    return Future.value();
+  }
+
+  @override
+  Future<void> editContact({required ContactModel contact}) {
+    _contactDao.updateContact(contact);
+    return Future.value();
+  }
+
+  @override
+  Future<List<ContactModel>> searchContact({required String searchQuery}) {
+    return _contactDao.searchContacts(searchQuery);
+  }
 }

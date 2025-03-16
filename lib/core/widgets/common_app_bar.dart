@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String appBarTitle;
   final Widget? leadingWidget;
+  final List<Widget>? actionWidgets;
 
   const CommonAppBar({
     super.key,
     required this.appBarTitle,
     this.leadingWidget,
+    this.actionWidgets,
   });
 
   @override
@@ -18,6 +20,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: leadingWidget,
       centerTitle: true,
       title: AppTextWidget(text: appBarTitle, textStyle: AppTextStyle.boldFont),
+      actions: actionWidgets,
     );
   }
 
