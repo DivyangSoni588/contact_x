@@ -1,12 +1,15 @@
+import 'package:contact_x/src/add_contacts/presentation/views/add_contacts_screen.dart';
 import 'package:contact_x/src/home/presentation/views/home_screen.dart';
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  final args = settings.arguments;
+  // final args = settings.arguments;
 
   switch (settings.name) {
     case HomeScreen.routeName:
       return _pageBuilder((_) => const HomeScreen(), settings: settings);
+    case AddContactsScreen.routeName:
+      return _pageBuilder((_) => const AddContactsScreen(), settings: settings);
     default:
       return _pageBuilder((_) => const Placeholder(), settings: settings);
   }

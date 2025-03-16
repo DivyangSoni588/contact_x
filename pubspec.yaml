@@ -16,10 +16,15 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+  email_validator: ^3.0.0
   equatable: ^2.0.7
   flutter_bloc: ^9.1.0
+  flutter_contacts: ^1.1.9+2
   get_it: ^8.0.3
+  image_picker: ^1.1.2
   path: ^1.9.1
+  path_provider: ^2.1.5
+  permission_handler: ^11.4.0
   sqflite: ^2.4.2
 
 dev_dependencies:

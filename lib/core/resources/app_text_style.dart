@@ -21,4 +21,9 @@ class AppTextStyle {
     color: AppColors.blackColor,
     fontWeight: FontWeight.w700,
   );
+  static const TextStyle redFont = TextStyle(
+    fontSize: 14,
+    color: AppColors.redColor,
+    fontWeight: FontWeight.w500,
+  );
 }

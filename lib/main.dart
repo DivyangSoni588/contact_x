@@ -3,6 +3,7 @@ import 'package:contact_x/core/services/injection_container.dart';
 import 'package:contact_x/core/services/router.dart';
 import 'package:contact_x/core/theme/app_theme.dart';
 import 'package:contact_x/l10n/app_localization.dart';
+import 'package:contact_x/src/add_contacts/presentation/contact_bloc/contact_bloc.dart';
 import 'package:contact_x/src/home/presentation/add_or_edit_category_bloc/category_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +24,7 @@ class ContactXApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<CategoryBloc>(create: (context) => CategoryBloc()),
+        BlocProvider<ContactBloc>(create: (context) => ContactBloc()),
       ],
       child: MaterialApp(
         title: 'ContactX',

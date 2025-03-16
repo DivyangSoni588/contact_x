@@ -1,6 +1,7 @@
 import 'package:contact_x/core/resources/app_string_keys.dart';
 import 'package:contact_x/core/resources/app_text_style.dart';
 import 'package:contact_x/core/widgets/app_text_widget.dart';
+import 'package:contact_x/src/add_contacts/presentation/views/add_contacts_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -21,7 +22,7 @@ class AppDrawer extends StatelessWidget {
                 textStyle: AppTextStyle.boldFont,
               ),
               onTap: () {
-                // Handle navigation
+                Navigator.pushNamed(context, AddContactsScreen.routeName);
               },
             ),
             Divider(),
@@ -32,7 +33,7 @@ class AppDrawer extends StatelessWidget {
                 textStyle: AppTextStyle.boldFont,
               ),
               onTap: () {
-                // Handle navigation
+                Navigator.pop(context);
               },
             ),
             Divider(),

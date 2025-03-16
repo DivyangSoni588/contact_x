@@ -1,23 +1,32 @@
 import 'package:contact_x/core/resources/app_colors.dart';
+import 'package:contact_x/core/resources/app_text_style.dart';
 import 'package:flutter/material.dart';
 
 class AppTextField extends StatelessWidget {
   final TextEditingController textEditingController;
   final String hintText;
+  final String errorText;
+  final TextInputType textInputType;
 
   const AppTextField({
     super.key,
     required this.textEditingController,
     required this.hintText,
+    this.errorText = '',
+    this.textInputType = TextInputType.text,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      keyboardType: textInputType,
       controller: textEditingController,
       decoration: InputDecoration(
         hintText: hintText,
-        error: null,
+        error:
+            errorText.isEmpty
+                ? null
+                : Text(errorText, style: AppTextStyle.redFont),
         border: OutlineInputBorder(
           borderRadius:
               BorderRadius.zero, // Makes edges sharp like square brackets

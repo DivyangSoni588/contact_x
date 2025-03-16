@@ -11,4 +11,11 @@ class AppStringKeys {
   static const String save = 'save';
   static const String cancel = 'cancel';
   static const String categoryAddError = 'category_add_error';
+  static const String firstName = 'first_name';
+  static const String email = 'email';
+  static const String lastName = 'last_name';
+  static const String mobileNumber = 'mobile_number';
+  static const String category = 'category';
+  static const String camera = 'camera';
+  static const String gallery = 'gallery';
 }
