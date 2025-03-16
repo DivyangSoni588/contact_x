@@ -45,9 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocListener<CategoryBloc, CategoryState>(
       listener: (context, state) {
         if (state is CategoryDuplicateError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
         }
       },
       child: Scaffold(
@@ -73,32 +73,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(height: 60),
                 AppTextField(
                   textEditingController: addCategoryController,
-                  hintText: context.appLocalizations.translate(
-                    AppStringKeys.addCategory,
-                  ),
+                  hintText: context.appLocalizations.translate(AppStringKeys.addCategory),
                 ),
                 SizedBox(height: 34),
                 ElevatedButton(
                   onPressed: () {
                     final text = addCategoryController.text.trim();
                     if (text.isNotEmpty) {
-                      context.read<CategoryBloc>().add(
-                        AddCategory(Category(name: text)),
-                      );
+                      context.read<CategoryBloc>().add(AddCategory(Category(name: text)));
                       addCategoryController.clear();
                     } else {
                       AppUIHelper.showSnackBar(
                         context: context,
-                        message: context.appLocalizations.translate(
-                          AppStringKeys.categoryAddError,
-                        ),
+                        message: context.appLocalizations.translate(AppStringKeys.categoryAddError),
                       );
                     }
                   },
-                  child: AppTextWidget(
-                    text: AppStringKeys.save,
-                    textStyle: AppTextStyle.boldFont,
-                  ),
+                  child: AppTextWidget(text: AppStringKeys.save, textStyle: AppTextStyle.boldFont),
                 ),
                 Expanded(
                   child: BlocBuilder<CategoryBloc, CategoryState>(
@@ -161,9 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void showEditCategoryDialog(BuildContext context, Category category) {
-    TextEditingController categoryController = TextEditingController(
-      text: category.name,
-    );
+    TextEditingController categoryController = TextEditingController(text: category.name);
 
     showDialog(
       context: context,
@@ -175,33 +164,26 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           content: AppTextField(
             textEditingController: categoryController,
-            hintText: context.appLocalizations.translate(
-              AppStringKeys.enterCategoryName,
-            ),
+            hintText: context.appLocalizations.translate(AppStringKeys.enterCategoryName),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // Close the dialog
               },
-              child: Text("Cancel"),
+              child: AppTextWidget(text: AppStringKeys.cancel, textStyle: AppTextStyle.regularBoldFont),
             ),
             ElevatedButton(
               onPressed: () {
                 final categoryName = categoryController.text.trim();
                 if (categoryName.isNotEmpty) {
                   context.read<CategoryBloc>().add(
-                    UpdateCategory(
-                      Category(name: categoryName, id: category.id),
-                    ),
+                    UpdateCategory(Category(name: categoryName, id: category.id)),
                   );
                   Navigator.pop(context); // Close the dialog
                 }
               },
-              child: AppTextWidget(
-                text: AppStringKeys.save,
-                textStyle: AppTextStyle.regularBoldFont,
-              ),
+              child: AppTextWidget(text: AppStringKeys.save, textStyle: AppTextStyle.boldFont),
             ),
           ],
         );

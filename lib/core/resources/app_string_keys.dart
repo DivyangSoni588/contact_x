@@ -9,5 +9,6 @@ class AppStringKeys {
   static const String addCategory = 'add_category';
   static const String contactList = 'contact_list';
   static const String save = 'save';
+  static const String cancel = 'cancel';
   static const String categoryAddError = 'category_add_error';
 }
