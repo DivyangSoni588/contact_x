@@ -1,0 +1,22 @@
+{
+  "app_name": "ContactX",
+  "create_and_store_category": "Create And Store Category",
+  "add_contacts": "Add Contacts",
+  "add_category": "Add Category",
+  "contact_list": "Contact List",
+  "save": "Save",
+  "cancel": "Cancel",
+  "no_data_found": "No Data Found",
+  "category_add_error": "Category name cannot be empty",
+  "enter_category_name": "Enter Category Name",
+  "first_name": "First Name",
+  "last_name": "Last Name",
+  "email": "Email",
+  "mobile_number": "Mobile Number",
+  "category": "Category",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "save_to_device_message": "Do you want to store this contact in your phone?",
+  "edit_contact": "Edit Contact",
+  "search_contacts": "Search Contacts"
+}
