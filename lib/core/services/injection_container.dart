@@ -5,6 +5,7 @@ import 'package:contact_x/src/home/data/sources/local_category_data_source.dart'
 import 'package:contact_x/src/home/domain/repositories/category_repository.dart';
 import 'package:contact_x/src/home/domain/usecases/add_category_use_case.dart';
 import 'package:contact_x/src/home/domain/usecases/delete_category_use_case.dart';
+import 'package:contact_x/src/home/domain/usecases/edit_category_use_case.dart';
 import 'package:contact_x/src/home/domain/usecases/get_all_category_use_case.dart';
 import 'package:get_it/get_it.dart';
 
@@ -33,5 +34,8 @@ Future<void> initDependencies() async {
   );
   getIt.registerLazySingleton(
     () => DeleteCategoryUseCase(getIt<CategoryRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => EditCategoryUseCase(getIt<CategoryRepository>()),
   );
 }

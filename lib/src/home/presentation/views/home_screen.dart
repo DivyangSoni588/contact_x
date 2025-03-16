@@ -77,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     context.read<CategoryBloc>().add(
                       AddCategory(Category(name: text)),
                     );
+                    addCategoryController.clear();
                   } else {
                     AppUIHelper.showSnackBar(
                       context: context,
@@ -118,7 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    showEditCategoryDialog(context, category);
+                                  },
                                   icon: Icon(Icons.edit),
                                 ),
                                 IconButton(
@@ -145,6 +148,50 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void showEditCategoryDialog(BuildContext context, Category category) {
+    TextEditingController categoryController = TextEditingController(
+      text: category.name,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Edit Category"),
+          content: TextField(
+            controller: categoryController,
+            decoration: InputDecoration(hintText: "Enter category name"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final categoryName = categoryController.text.trim();
+                if (categoryName.isNotEmpty) {
+                  context.read<CategoryBloc>().add(
+                    UpdateCategory(
+                      Category(name: categoryName, id: category.id),
+                    ),
+                  );
+                  Navigator.pop(context); // Close the dialog
+                }
+              },
+              child: AppTextWidget(
+                text: AppStringKeys.save,
+                textStyle: AppTextStyle.regularBoldFont,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

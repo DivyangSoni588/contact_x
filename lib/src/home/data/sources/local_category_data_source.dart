@@ -22,4 +22,10 @@ class LocalCategoryDataSource implements CategoryDataSource {
     categoryDao.insertCategory(category);
     return Future.value();
   }
+
+  @override
+  Future<void> editCategory({required Category category}) {
+    categoryDao.updateCategory(category);
+    return Future.value();
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:contact_x/src/home/domain/usecases/add_category_use_case.dart';
 import 'package:contact_x/src/home/domain/usecases/delete_category_use_case.dart';
+import 'package:contact_x/src/home/domain/usecases/edit_category_use_case.dart';
 import 'package:contact_x/src/home/domain/usecases/get_all_category_use_case.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -14,6 +15,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       GetIt.instance.get<AddCategoryUseCase>();
   final DeleteCategoryUseCase _deleteCategoryUseCase =
       GetIt.instance.get<DeleteCategoryUseCase>();
+  final EditCategoryUseCase _editCategoryUseCase =
+      GetIt.instance.get<EditCategoryUseCase>();
 
   CategoryBloc() : super(CategoryInitial()) {
     on<LoadCategories>(_onLoadCategories);
@@ -52,7 +55,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     Emitter<CategoryState> emit,
   ) async {
     try {
-      // await categoryRepository.updateCategory(event.category);
+      await _editCategoryUseCase.execute(category: event.category);
       add(LoadCategories()); // Refresh the list after updating
     } catch (e) {
       emit(CategoryError("Failed to update category"));

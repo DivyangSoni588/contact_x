@@ -24,4 +24,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
     _categoryDataSource.addCategory(category: category);
     return Future.value();
   }
+
+  @override
+  Future<void> editCategory({required Category category}) {
+    _categoryDataSource.editCategory(category: category);
+    return Future.value();
+  }
 }
